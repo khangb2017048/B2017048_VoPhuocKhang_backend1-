@@ -15,11 +15,16 @@ app.use((req, res, next) => {
 
 // Middleware xử lý lỗi
 app.use((err, req, res, next) => {
-    // Trả về lỗi dưới dạng JSON
-    return res.status(err.statusCode || 500).json({
-        message: err.message || "Internal Server Error",
-    });
+    if (err instanceof ApiError) {
+        // Nếu là một ApiError, trả về mã lỗi và thông báo từ đối tượng lỗi
+        return res.status(err.statusCode).json({ message: err.message });
+    }
+
+    // Xử lý các loại lỗi khác
+    console.error(err); // In lỗi ra console để ghi nhận và gỡ lỗi
+    res.status(500).json({ message: "Internal Server Error" }); // Trả về mã lỗi 500 (Internal Server Error)
 });
+
 
 app.use("/api/contacts", contactsRouter);
 
